@@ -3,6 +3,9 @@ const Pool = require("pg").Pool;
 
 const proConfig = {
 	connectionString: process.env.DATABASE_URL,
+	ssl: {
+		rejectUnauthorized: false,
+	},
 };
 
 const devConfig = {
