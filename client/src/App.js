@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BsCloudUpload, BsTrash } from "react-icons/bs";
-import { FaTrash } from "react-icons/fa";
+import { FaEye, FaTrash } from "react-icons/fa";
+import { BsTrash2Fill } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { delete_image, get_images, post_images } from "./redux/action";
 import { DELETE_IMAGE_RESET, POST_IMAGE_RESET } from "./redux/constant";
@@ -9,6 +10,7 @@ import getBase64 from "./utils/getbase64";
 const App = () => {
 	const [imageFile, setImageFile] = useState("");
 	const [imageFormat, setImageFormat] = useState("");
+	const [pageNumber, setPageNumber] = useState(1);
 
 	const dispatch = useDispatch();
 
@@ -22,14 +24,14 @@ const App = () => {
 	const { loading: loadingDelete, success: successDelete } = deleteImage;
 
 	useEffect(() => {
-		dispatch(get_images());
+		dispatch(get_images(pageNumber));
 		if (success || successDelete) {
 			dispatch({ type: DELETE_IMAGE_RESET });
 			dispatch({ type: POST_IMAGE_RESET });
 			setImageFormat("");
 			setImageFile("");
 		}
-	}, [success, successDelete]);
+	}, [success, successDelete, pageNumber]);
 
 	const fileInputChange = (e) => {
 		let file = e.target.files[0];
@@ -73,7 +75,7 @@ const App = () => {
 				<div className="box">
 					<div className="row">
 						<div className="col-lg-4">
-							<div className="image-box">
+							<div className="image-box shadow-sm">
 								{imageFile ? (
 									<img
 										src={`data:image/${imageFormat};base64,${imageFile}`}
@@ -81,7 +83,7 @@ const App = () => {
 										className="img-fluid"
 									/>
 								) : (
-									<p>....</p>
+									<p></p>
 								)}
 							</div>
 							{imageFile ? (
@@ -123,43 +125,102 @@ const App = () => {
 						<div className="col-lg-8">
 							<div className="card">
 								<div className="card-body">
-									{images &&
-										(images.length > 0 ? (
-											<div className="images row">
-												{images.map((img) => (
-													<div
-														className="col-lg-4 mb-3"
-														key={img.id}
-													>
-														<div className="body-img">
-															<img
-																src={`data:image/${img.image_type};base64,${img.image_value}`}
-																alt="ImageFile"
-																className="img-fluid"
-															/>
-															<button
-																onClick={() =>
-																	deleteImageHandler(
-																		img.id
-																	)
-																}
-															>
-																<FaTrash
-																	size={13}
-																/>
-															</button>
-														</div>
+									{loading ? (
+										<div className="text-center mt-3">
+											<img
+												src="/loading.gif"
+												height={30}
+											/>
+											<p>Fetching Images...</p>
+										</div>
+									) : (
+										<>
+											{images &&
+												images.images &&
+												(images.images.length > 0 ? (
+													<div className="images row">
+														{images.images.map(
+															(img) => (
+																<div
+																	className="col-lg-4 mb-3"
+																	key={img.id}
+																>
+																	<div className="body-img shadow-sm">
+																		<img
+																			src={`data:image/${img.image_type};base64,${img.image_value}`}
+																			alt="ImageFile"
+																			className="img-fluid"
+																		/>
+																		<button
+																			className="del"
+																			onClick={() =>
+																				deleteImageHandler(
+																					img.id
+																				)
+																			}
+																		>
+																			<BsTrash2Fill
+																				size={
+																					13
+																				}
+																			/>
+																		</button>
+																	</div>
+																</div>
+															)
+														)}
+
+														{images.meta &&
+															images.meta.pages >
+																1 && (
+																<div className="col-md-12 mt-4">
+																	<div className="paginate">
+																		{[
+																			...Array(
+																				images
+																					.meta
+																					.pages
+																			).keys(),
+																		].map(
+																			(
+																				x
+																			) => (
+																				<button
+																					className={
+																						pageNumber ===
+																						x +
+																							1
+																							? "active"
+																							: ""
+																					}
+																					onClick={() =>
+																						setPageNumber(
+																							Number(
+																								x +
+																									1
+																							)
+																						)
+																					}
+																				>
+																					{x +
+																						1}
+																				</button>
+																			)
+																		)}
+																	</div>
+																</div>
+															)}
+													</div>
+												) : (
+													<div className="no-img">
+														<p>
+															No Image has been
+															uploaded.
+														</p>
 													</div>
 												))}
-											</div>
-										) : (
-											<div className="no-img">
-												<p>
-													No Image has been uploaded.
-												</p>
-												]
-											</div>
-										))}
+										</>
+									)}
 								</div>
 							</div>
 						</div>

@@ -7,10 +7,27 @@ const router = express.Router();
 router.get(
 	"/",
 	asyncHandler(async (req, res) => {
-		const images = await pool.query("SELECT * FROM images");
+		const pageNumber = req.query.pageNumber || 1;
+		const pageSize = 9;
+
+		const skip = pageSize * (pageNumber - 1);
+
+		const count = await pool.query(`SELECT * FROM images`);
+
+		const images = await pool.query(
+			`SELECT * FROM images ORDER BY id DESC OFFSET ${skip} LIMIT ${pageSize}`
+		);
+
 		res.json({
 			status: "ok",
-			images: images.rows,
+			data: {
+				images: images.rows,
+				meta: {
+					total: count.rowCount,
+					page: pageNumber,
+					pages: Math.ceil(count.rowCount / pageSize),
+				},
+			},
 		});
 	})
 );

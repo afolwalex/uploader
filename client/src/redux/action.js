@@ -6,16 +6,19 @@ const config_headers = {
 	"Access-Control-Allow-Origin": "*",
 };
 
-export const get_images = () => async (dispatch) => {
+export const get_images = (page) => async (dispatch) => {
 	try {
 		dispatch({ type: types.GET_IMAGES_REQUEST });
 
-		const { data } = await axios.get(`/api/image`, {
-			headers: config_headers,
-		});
+		const { data } = await axios.get(
+			`http://localhost:5000/api/image?pageNumber=${page}`,
+			{
+				headers: config_headers,
+			}
+		);
 
 		if (data.status === "ok") {
-			dispatch({ type: types.GET_IMAGES_SUCCESS, payload: data.images });
+			dispatch({ type: types.GET_IMAGES_SUCCESS, payload: data.data });
 		}
 	} catch (error) {
 		const message = error.response
