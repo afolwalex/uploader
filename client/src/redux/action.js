@@ -10,12 +10,9 @@ export const get_images = (page) => async (dispatch) => {
 	try {
 		dispatch({ type: types.GET_IMAGES_REQUEST });
 
-		const { data } = await axios.get(
-			`http://localhost:5000/api/image?pageNumber=${page}`,
-			{
-				headers: config_headers,
-			}
-		);
+		const { data } = await axios.get(`/api/image?pageNumber=${page}`, {
+			headers: config_headers,
+		});
 
 		if (data.status === "ok") {
 			dispatch({ type: types.GET_IMAGES_SUCCESS, payload: data.data });
