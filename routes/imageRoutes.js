@@ -8,7 +8,6 @@ router.get(
 	"/",
 	asyncHandler(async (req, res) => {
 		const images = await pool.query("SELECT * FROM images");
-		console.log(images.rowCount);
 		res.json({
 			status: "ok",
 			images: images.rows,
